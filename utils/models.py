@@ -7,11 +7,33 @@ from torch.nn.utils import weight_norm
 class lstm_reg(nn.Module):
     def __init__(self, input_size, hidden_size, output_size=1, num_layers=2):
         super(lstm_reg, self).__init__()
-        
+        """
+        parameters:
+        :input_size:输入维度
+        :hidden_size:隐藏层维度
+        :out_size:输出维度
+        :num_layers:隐藏层层数
+        """
         self.rnn = nn.LSTM(input_size, hidden_size, num_layers) # rnn
         self.reg = nn.Linear(hidden_size, output_size) # 回归
         
     def forward(self, x):
+        """
+        前向传播
+        RNN的输入格式是(seq,batch,features),seq即整个序列(时间序列、文本序列)
+        的长度。单步遍历时，seq上一点对应的数据维度就是(batch,features)，在当前
+        seq点上往后数batch(批量的大小)个构造的观测。features即为lookback的长度
+        
+        直接使用nn中的GRU/LSTM/RNN模块时，输出有所不同(与RNNcell相比)。
+        out, h_t = rnn(x)
+        其中x的维度依然是(seq,batch,features)
+        
+        输出有多个。
+        out的输出维度也为(seq, batch, feature)
+        h_t是隐藏层状态，LSTM 输出的隐藏状态有两个，h 和 c:
+        out, (h, c) = lstm_seq(lstm_input)
+
+        """
         x, _ = self.rnn(x) # (seq, batch, hidden)
         s, b, h = x.shape
         x = x.view(s*b, h) # 转换成线性层的输入格式
