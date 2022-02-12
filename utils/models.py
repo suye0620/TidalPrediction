@@ -80,3 +80,22 @@ class TemporalConvNet(nn.Module):
 
     def forward(self, x):
         return self.network(x)
+
+class CNNLSTM(nn.Module):
+    def __init__(self, num_classes=2):
+        super(CNNLSTM, self).__init__()
+        self.cnn = LeNetVariant()
+        self.lstm = nn.LSTM(input_size=84, hidden_size=128, num_layers=2,
+                            batch_first=True)
+        self.fc1 = nn.Linear(128, num_classes)
+
+    def forward(self, x_3d):
+        cnn_output_list = list()
+        for t in range(x_3d.size(1)):
+            cnn_output_list.append(self.cnn(x_3d[:, t, :, :, :]))
+        x = torch.stack(tuple(cnn_output_list), dim=1)
+        out, hidden = self.lstm(x)
+        x = out[:, -1, :]
+        x = nn.ReLU(x)
+        x = self.fc1(x)
+        return x
