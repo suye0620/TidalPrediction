@@ -30,6 +30,8 @@ def evaluate(model, loader, config):
         X = X.to(config.device)
         Y = Y.to(config.device)
         
+        # if idx == 1:
+            # print("Y的shape是: ",Y.cpu().shape)
         y_pre += model(X).cpu().squeeze().tolist()
         y += Y.cpu().squeeze().tolist()
 

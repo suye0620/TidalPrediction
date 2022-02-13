@@ -121,3 +121,19 @@ class CNNLSTM(nn.Module):
         x = nn.ReLU(x)
         x = self.fc1(x)
         return x
+
+class CNNnetwork(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1d = nn.Conv1d(1,12,kernel_size=2)
+        self.relu = nn.ReLU(inplace=True)
+        self.Linear1= nn.Linear(12*11,50)
+        self.Linear2= nn.Linear(50,1)      
+    def forward(self,x):
+        x = self.conv1d(x)
+        x = self.relu(x)
+        x = x.view(-1)
+        x = self.Linear1(x)
+        x = self.relu(x)
+        x = self.Linear2(x)
+        return x
