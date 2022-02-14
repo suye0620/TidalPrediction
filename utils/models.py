@@ -14,16 +14,16 @@ class lstm_reg(nn.Module):
         :out_size:输出维度
         :num_layers:隐藏层层数
         """
-        self.rnn = nn.LSTM(input_size, hidden_size, num_layers) # rnn
+        self.rnn = nn.LSTM(input_size, hidden_size, num_layers,batch_first=True) # rnn
         self.reg = nn.Linear(hidden_size, output_size) # 回归
         
     def forward(self, x):
         """
         前向传播
         """
-        x, _ = self.rnn(x) # (seq, batch, hidden)
+        x, _ = self.rnn(x) # (batch,seq,  hidden)
 
-        x = self.reg(x[-1,:,:])
+        x = self.reg(x[:,-1,:])
         return x
 
 class CNNBiLSTM(nn.Module):

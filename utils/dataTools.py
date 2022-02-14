@@ -18,6 +18,10 @@ class mydataReader:
         max_value = data_csv["Water_Level_LAT"].max()
         min_value = data_csv["Water_Level_LAT"].min()
         scalar = max_value - min_value
+        with open("./log/scalar.txt",mode='w+',encoding='utf-8') as f:
+            f.write("max_value = {0} \nmin_value = {1} \nscalar = {2}".format(max_value,min_value,scalar))
+        f.close()
+
         data_csv["Water_Level_LAT"] = data_csv["Water_Level_LAT"].map(lambda x: (x-min_value)/scalar)
 
         self.data_csv = data_csv
@@ -26,25 +30,35 @@ class mydataReader:
         dataset = data_csv.values
         self.dataset = dataset.astype('float32')
 
-    def split(self,lookback,trainSet_ratio = 0.7):
+    def split(self,lookback,trainSet_ratio = 0.7,valSet_ratio = 0.1):
         # 数据集创建
         dataX, dataY = [], []
+        # print(self.dataset.shape) (19316, 1) data_csv.values会多出一个维度
         for i in tqdm(range(len(self.dataset) - lookback)):
             a = self.dataset[i:(i + lookback)]
             dataX.append(a)
             dataY.append(self.dataset[i + lookback])
         data_X,data_Y = np.array(dataX), np.array(dataY)
+        # 去掉那个多的维度
+        data_X = data_X.squeeze()
+
+        # print(data_X.shape) (19306, 10)
+        # print(data_Y.shape) (19306, 1)
 
         # 数据划分
         train_size = int(len(data_X) * trainSet_ratio)
-        test_size = len(data_X) - train_size
+        val_size = int(len(data_X) * valSet_ratio)
+        test_size = len(data_X) - train_size - val_size
+
         train_X = data_X[:train_size]
         train_Y = data_Y[:train_size]
-        test_X = data_X[train_size:]
-        test_Y = data_Y[train_size:]
+        val_X = data_X[train_size:train_size+val_size]
+        val_Y = data_Y[train_size:train_size+val_size]
+        test_X = data_X[train_size+val_size:]
+        test_Y = data_Y[train_size+val_size:]
 
         print("测试集大小为{}".format(test_size))
-        return (train_X,train_Y), (test_X,test_Y)
+        return (train_X,train_Y) , (val_X,val_Y) , (test_X,test_Y)
 
     def getSeries(self):
         """

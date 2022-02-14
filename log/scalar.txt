@@ -1,0 +1,3 @@
+max_value = 4.848 
+min_value = 0.277 
+scalar = 4.571
