@@ -5,7 +5,7 @@ from config import Config
 
 from utils.dataTools import *
 from utils.models import lstm_reg,CNNBiLSTM
-from utils.trainer import RNNtrain,evaluate,CNNBiLstmtrain
+from utils.trainer import RNNtrain,CNNBiLstm_evaluate,CNNBiLstmtrain
 
 if __name__ == '__main__':
     config = Config()
@@ -41,4 +41,4 @@ if __name__ == '__main__':
                   config=config)
 
     print("Testing...", round(len(testSet)/config.batch_size))
-    evaluate(model, test_loader, config)
+    CNNBiLstm_evaluate(model, test_loader, config)

@@ -1,5 +1,5 @@
 from tqdm import tqdm
-from sklearn.metrics import r2_score
+from sklearn.metrics import r2_score,mean_absolute_error,mean_squared_error
 
 def RNNtrain(model, loader, criterion, optimizer, config):
     model.train()
@@ -67,6 +67,38 @@ def evaluate(model, loader, config):
     y = list()
     y_pre = list()
     for idx, (X, Y) in tqdm(enumerate(loader)):
+        X = X.reshape(config.lookback,-1,1).to(config.device)
+        Y = Y.reshape(1,-1,1).to(config.device)
+        if idx == 0:
+                print(X.shape)
+        
+        y_pre += model(X).cpu().squeeze().tolist()
+        y += Y.cpu().squeeze().tolist()
+
+
+
+    r2Score = r2_score(y_true=y, y_pred=y_pre)
+    meanSquaredError = mean_squared_error(y_true=y, y_pred=y_pre)
+    meanAbsoluteError = mean_absolute_error(y_true=y, y_pred=y_pre)
+    print("r2Score: ", r2Score)
+    print("meanSquaredError: ", meanSquaredError)
+    print("meanAbsoluteError: ", meanAbsoluteError)
+
+    # 画出实际结果和预测的结果
+    import matplotlib.pyplot as plt
+    
+    plt.plot(range(len(y[:1000])),y_pre[:1000],color = 'red',linewidth = 1.5,linestyle = '-.',label='prediction')
+    plt.plot(range(len(y[:1000])),y[:1000],color = 'blue',linewidth = 1.5,linestyle = '-', label='real')
+    plt.legend(loc='best')
+
+    return (r2Score,meanSquaredError,meanAbsoluteError)
+
+def CNNBiLstm_evaluate(model, loader, config):
+    model.eval()
+
+    y = list()
+    y_pre = list()
+    for idx, (X, Y) in tqdm(enumerate(loader)):
         X = X.squeeze().unsqueeze(1).to(config.device)
         Y = Y.to(config.device)
         if idx == 0:
@@ -78,11 +110,17 @@ def evaluate(model, loader, config):
 
 
     r2Score = r2_score(y_true=y, y_pred=y_pre)
+    meanSquaredError = mean_squared_error(y_true=y, y_pred=y_pre)
+    meanAbsoluteError = mean_absolute_error(y_true=y, y_pred=y_pre)
     print("r2Score: ", r2Score)
+    print("meanSquaredError: ", meanSquaredError)
+    print("meanAbsoluteError: ", meanAbsoluteError)
 
     # 画出实际结果和预测的结果
-    # import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt
     
-    # plt.plot(range(len(y[:1000])),y_pre[:1000],color = 'red',linewidth = 1.5,linestyle = '-.',label='prediction')
-    # plt.plot(range(len(y[:1000])),y[:1000],color = 'blue',linewidth = 1.5,linestyle = '-', label='real')
-    # plt.legend(loc='best')
+    plt.plot(range(len(y[:1000])),y_pre[:1000],color = 'red',linewidth = 1.5,linestyle = '-.',label='prediction')
+    plt.plot(range(len(y[:1000])),y[:1000],color = 'blue',linewidth = 1.5,linestyle = '-', label='real')
+    plt.legend(loc='best')
+
+    return (r2Score,meanSquaredError,meanAbsoluteError)
