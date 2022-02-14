@@ -20,26 +20,88 @@ class lstm_reg(nn.Module):
     def forward(self, x):
         """
         前向传播
-        RNN的输入格式是(seq,batch,features),seq即整个序列(时间序列、文本序列)
-        的长度。单步遍历时，seq上一点对应的数据维度就是(batch,features)，在当前
-        seq点上往后数batch(批量的大小)个构造的观测。features即为lookback的长度
-        
-        直接使用nn中的GRU/LSTM/RNN模块时，输出有所不同(与RNNcell相比)。
-        out, h_t = rnn(x)
-        其中x的维度依然是(seq,batch,features)
-        
-        输出有多个。
-        out的输出维度也为(seq, batch, feature)
-        h_t是隐藏层状态，LSTM 输出的隐藏状态有两个，h 和 c:
-        out, (h, c) = lstm_seq(lstm_input)
-
         """
         x, _ = self.rnn(x) # (seq, batch, hidden)
-        s, b, h = x.shape
-        x = x.view(s*b, h) # 转换成线性层的输入格式
-        x = self.reg(x)
-        x = x.view(s, b, -1)
+
+        x = self.reg(x[-1,:,:])
         return x
+
+class CNNBiLSTM(nn.Module):
+    def __init__(self,hidden_size,num_layers):
+        super(CNNBiLSTM, self).__init__()
+
+        # self.conv_pool = nn.ModuleList([ConvModule(if_pool=False),
+        #                                 ConvModule(if_pool=False),
+        #                                 ConvModule()])
+        self.conv_pool = nn.Sequential(ConvModule())
+        self.lstm = BiLSTMModule(hidden_size=hidden_size,num_layers=num_layers)
+
+    def forward(self, x):
+        
+        x = self.conv_pool(x)  # (batch_size, channel_size=1, seq_len)
+            
+        out = x.squeeze_().unsqueeze_(2)  # (batch_size, seq_len, feature_size=1)
+
+        out = self.lstm(out)  # (batch_size, seq_len=1, feature_size=1)
+
+        return out
+
+class ConvModule(nn.Module):
+    """
+    convolution-based options:
+
+    conv-1d:
+    (batch_size, channel_size, input_size)  input_size(seq_len)是conv-1d的操作维度
+    after conv:
+    seq_len' = (input_size - kernel_size + 2 * pad_size) // stride + 1
+    (k=3, s=1, p=1) 可以保持输入维度不变
+    """
+
+    def __init__(self,
+                 c_k=3, c_s=1, c_p=1,  # conv param
+                 p_k=3, p_s=1, p_p=1,  # pool param
+                 if_pool: bool = True):
+        super(ConvModule, self).__init__()
+
+        self.conv = nn.Conv1d(in_channels=1,
+                              out_channels=1,
+                              kernel_size=c_k,
+                              stride=c_s,
+                              padding=c_p)
+
+        self.if_pool = if_pool
+        if if_pool:
+            self.pool = nn.MaxPool1d(kernel_size=p_k,
+                                     stride=p_s,
+                                     padding=p_p)
+
+    def forward(self, x):
+        out = self.conv(x)
+
+        if self.if_pool:
+            out = self.pool(out)
+
+        return out
+
+class BiLSTMModule(nn.Module):
+    def __init__(self, hidden_size=1, num_layers=2, dropout=0.5):
+        super(BiLSTMModule, self).__init__()
+
+        self.lstm = nn.LSTM(input_size=1,
+                            hidden_size=hidden_size,
+                            num_layers=num_layers,
+                            dropout=dropout,
+                            batch_first=True,
+                            bidirectional=True)
+
+        self.fc = nn.Linear(hidden_size * 2, 1)  # bidirectional
+
+    def forward(self, x):
+        out, _ = self.lstm(x)  # (batch_size, seq_len, feature_size)
+
+        out = self.fc(out[:, -1, :])  # 使用隐藏层最后一个time step进行预测
+
+        return out
 
 # TCN模块
 # 这个函数是用来修剪卷积之后的数据的尺寸，让其与输入数据尺寸相同。
@@ -102,38 +164,3 @@ class TemporalConvNet(nn.Module):
 
     def forward(self, x):
         return self.network(x)
-
-class CNNLSTM(nn.Module):
-    def __init__(self, num_classes=2):
-        super(CNNLSTM, self).__init__()
-        self.cnn = LeNetVariant()
-        self.lstm = nn.LSTM(input_size=84, hidden_size=128, num_layers=2,
-                            batch_first=True)
-        self.fc1 = nn.Linear(128, num_classes)
-
-    def forward(self, x_3d):
-        cnn_output_list = list()
-        for t in range(x_3d.size(1)):
-            cnn_output_list.append(self.cnn(x_3d[:, t, :, :, :]))
-        x = torch.stack(tuple(cnn_output_list), dim=1)
-        out, hidden = self.lstm(x)
-        x = out[:, -1, :]
-        x = nn.ReLU(x)
-        x = self.fc1(x)
-        return x
-
-class CNNnetwork(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.conv1d = nn.Conv1d(1,12,kernel_size=2)
-        self.relu = nn.ReLU(inplace=True)
-        self.Linear1= nn.Linear(12*11,50)
-        self.Linear2= nn.Linear(50,1)      
-    def forward(self,x):
-        x = self.conv1d(x)
-        x = self.relu(x)
-        x = x.view(-1)
-        x = self.Linear1(x)
-        x = self.relu(x)
-        x = self.Linear2(x)
-        return x

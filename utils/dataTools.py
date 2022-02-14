@@ -54,20 +54,12 @@ class mydataReader:
 
 # 定义一个子类叫 custom_dataset，继承与 Dataset
 class custom_dataset(Dataset):
-    def __init__(self,data_X,data_Y,lookback):
+    def __init__(self,data_X,data_Y):
         """
         :parameters:
         data_X: 构造好的X矩阵
         data_Y: 构造好的Y标签
-        最后，我们需要将数据改变一下形状，
-        因为 RNN 读入的数据维度是 (seq, batch, feature)，
-        所以要重新改变一下数据的维度，这里只有一个序列，
-        所以 batch 是 config.batch，而输入的 feature 就是我们希望依据的几个时间步，
-        这里我们定的是10，所以 feature 就是 10.
-        把feature的维度后调
         """
-        data_X = data_X.reshape(-1, 1, lookback)
-        data_Y = data_Y.reshape(-1, 1, 1)
         self.X = torch.tensor(data_X, dtype=torch.float32)
         self.Y = torch.tensor(data_Y, dtype=torch.float32)
 
@@ -77,28 +69,6 @@ class custom_dataset(Dataset):
     def __len__(self):
         return len(self.X)
 
-# 定义一个子类叫 custom_dataset，继承与 Dataset
-class CNNdataset(Dataset):
-    def __init__(self,data_X,data_Y,lookback):
-        """
-        :parameters:
-        data_X: 构造好的X矩阵
-        data_Y: 构造好的Y标签
-        最后，我们需要将数据改变一下形状，
-        因为 RNN 读入的数据维度是 (seq, batch, feature)，
-        所以要重新改变一下数据的维度，这里只有一个序列，
-        所以 batch 是 config.batch，而输入的 feature 就是我们希望依据的几个时间步，
-        这里我们定的是10，所以 feature 就是 10.
-        把feature的维度后调
-        """
-        self.X = torch.tensor(data_X, dtype=torch.float32)
-        self.Y = torch.tensor(data_Y, dtype=torch.float32)
-
-    def __getitem__(self, index):
-        return self.X[index], self.Y[index]
-
-    def __len__(self):
-        return len(self.X)
 
 
 """    废置代码
