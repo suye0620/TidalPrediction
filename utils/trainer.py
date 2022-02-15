@@ -34,7 +34,7 @@ def RNNevaluate(model, loader, config, val_mode=False):
         plt.plot(range(len(y[:1000])),y[:1000],color = 'blue',linewidth = 1.5,linestyle = '-', label='real')
         plt.legend(loc='best')
 
-        return (r2Score,meanSquaredError,meanAbsoluteError)
+        return y_pre,y
 
 def CNNBiLstm_evaluate(model, loader, config, val_mode=False):
     model.eval()
@@ -45,8 +45,6 @@ def CNNBiLstm_evaluate(model, loader, config, val_mode=False):
         # Conv1d接受的数据输入是(batch_size有, channel_size=1, seq_len有),故增加一个通道数，单序列通道数为1，第2维
         X = X.unsqueeze(-2).to(config.device)
         Y = Y.to(config.device)
-        if idx == 0:
-                print(X.shape)
         
         y_pre += model(X).cpu().squeeze().tolist()
         y += Y.cpu().squeeze().tolist()
@@ -69,7 +67,7 @@ def CNNBiLstm_evaluate(model, loader, config, val_mode=False):
         plt.plot(range(len(y[:1000])),y[:1000],color = 'blue',linewidth = 1.5,linestyle = '-', label='real')
         plt.legend(loc='best')
 
-        return (r2Score,meanSquaredError,meanAbsoluteError)
+        return y_pre,y
 
 
 def RNNtrain(model, trainloader,valloader,criterion, optimizer, config):
@@ -109,8 +107,6 @@ def CNNBiLstmtrain(model, trainloader,valloader, criterion, optimizer, config):
             # Conv1d接受的数据输入是(batch_size有, channel_size=1, seq_len有),故增加一个通道数，单序列通道数为1，第2维
             X = X.unsqueeze(-2).to(config.device)
             Y = Y.to(config.device)
-            if idx == 0:
-                print(X.shape)
             
             predict = model(X)
             loss = criterion(predict, Y)

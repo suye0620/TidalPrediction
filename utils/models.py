@@ -3,28 +3,26 @@ import torch.nn as nn
 from torch.nn.utils import weight_norm
 
 # 定义模型
-# 简单LSTM
-class lstm_reg(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size=1, num_layers=2):
-        super(lstm_reg, self).__init__()
-        """
-        parameters:
-        :input_size:输入维度
-        :hidden_size:隐藏层维度
-        :out_size:输出维度
-        :num_layers:隐藏层层数
-        """
-        self.rnn = nn.LSTM(input_size, hidden_size, num_layers,batch_first=True) # rnn
-        self.reg = nn.Linear(hidden_size, output_size) # 回归
-        
-    def forward(self, x):
-        """
-        前向传播
-        """
-        x, _ = self.rnn(x) # (batch,seq,  hidden)
+# 简单BiLSTM
+class BiLSTM_Reg(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size=1, num_layers=2, dropout=0.3):
+        super(BiLSTM_Reg, self).__init__()
 
-        x = self.reg(x[:,-1,:])
-        return x
+        self.lstm = nn.LSTM(input_size=input_size,
+                            hidden_size=hidden_size,
+                            num_layers=num_layers,
+                            dropout=dropout,
+                            batch_first=True,
+                            bidirectional=True)
+
+        self.fc = nn.Linear(hidden_size * 2, output_size)  # bidirectional
+
+    def forward(self, x):
+        out, _ = self.lstm(x)  # (batch_size, seq_len, feature_size)
+
+        out = self.fc(out[:, -1, :])  # 使用隐藏层最后一个time step进行预测
+
+        return out
 
 class CNNBiLSTM(nn.Module):
     def __init__(self,hidden_size,num_layers):
