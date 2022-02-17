@@ -5,7 +5,7 @@ from torch.nn.utils import weight_norm
 # 定义模型
 # 简单BiLSTM
 class BiLSTM_Reg(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size=1, num_layers=2, dropout=0.3):
+    def __init__(self, input_size, hidden_size, output_size=1, num_layers=2, dropout=0.5):
         super(BiLSTM_Reg, self).__init__()
 
         self.lstm = nn.LSTM(input_size=input_size,
