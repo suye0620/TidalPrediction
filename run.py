@@ -1,10 +1,9 @@
 import torch
 from torch.utils.data import DataLoader
-
 from config import Config
 
 from utils.dataTools import *
-from utils.models import lstm_reg,CNNBiLSTM
+from utils.models import CNNBiLSTM
 from utils.trainer import CNNBiLstm_evaluate,CNNBiLstmtrain
 
 if __name__ == '__main__':
@@ -12,7 +11,7 @@ if __name__ == '__main__':
 
     print("Data loading...")
     # 序列数据
-    dataset = mydataReader("./dataProcessed/testData.csv")
+    dataset = mydataReader("./dataProcessed/IrishNationalTideGaugeNetwork_Ballycotton Harbour2017.csv")
 
     # 创建X/Y
     # 划分训练集和测试集，70% 作为训练集,10%作为验证集,20%作为测试集

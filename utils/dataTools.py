@@ -9,11 +9,13 @@ class mydataReader:
     def __init__(self,filename) -> None:
         data_csv = pd.read_csv(filename, usecols=['time','Water_Level_LAT'],
         index_col='time',parse_dates=['time'])
-
+        # ##############################################################
+        # Tips:
         # 数据预处理(归一化有利于梯度下降)-MMS标准化
         # 如果不进行归一化，那么由于特征向量中不同特征的取值相差较大，
         # 会导致目标函数变“扁”。这样在进行梯度下降的时候，
         # 梯度的方向就会偏离最小值的方向，走很多弯路，即训练时间过长。
+        # ##############################################################
         data_csv = data_csv.dropna()
         max_value = data_csv["Water_Level_LAT"].max()
         min_value = data_csv["Water_Level_LAT"].min()
