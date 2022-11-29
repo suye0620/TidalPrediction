@@ -84,7 +84,7 @@ class ConvModule(nn.Module):
 class BiLSTMModule(nn.Module):
     def __init__(self, hidden_size=1, num_layers=2, dropout=0.5):
         super(BiLSTMModule, self).__init__()
-
+        # 在这里你可以修改成GRU单元
         self.lstm = nn.LSTM(input_size=1,
                             hidden_size=hidden_size,
                             num_layers=num_layers,
