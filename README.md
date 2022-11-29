@@ -20,6 +20,7 @@ Data units:
 - `images/`: images used in the README.md
 - `result/` & `result(2)/`: some results during our experiments
 - `run.py`: the entry point to the program
+- `config.py`: parameters in NN
 - `*.ipynb`:some test code in our experimentsour experiments
 
 ## How to run the program
