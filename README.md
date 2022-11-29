@@ -10,6 +10,10 @@ Visit [here](http://data.marine.ie/geonetwork/srv/eng/catalog.search#/metadata/i
 
 Data units: 
 
+```
+,,degrees_east,degrees_north,UTC,millibars,degrees true,knots,knots,meters,seconds,degrees_true,meters,degrees_C,degrees_C,degrees_C,dimensionless,percent,degrees,degrees_true,seconds,
+```
+
 ## Descriptions of the folders and files in this repositor
 
 - `dataProcessed/`: processed data which will be used in the follow-up study
