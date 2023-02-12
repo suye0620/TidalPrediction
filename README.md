@@ -14,7 +14,7 @@ Data units:
 ,,degrees_east,degrees_north,UTC,millibars,degrees true,knots,knots,meters,seconds,degrees_true,meters,degrees_C,degrees_C,degrees_C,dimensionless,percent,degrees,degrees_true,seconds,
 ```
 
-## Descriptions of the folders and files in this repositor
+## Descriptions of the folders and files in this repository
 
 - `dataProcessed/`: processed data which will be used in the follow-up study
 - `log/`: the log of model training and some intermediate results
@@ -25,7 +25,7 @@ Data units:
 - `result/` & `result(2)/`: some results during our experiments
 - `run.py`: the entry point to the program
 - `config.py`: parameters in NN
-- `*.ipynb`:some test code in our experimentsour experiments
+- `*.ipynb`:some test code in our experiment 
 
 ## How to run the program
 
